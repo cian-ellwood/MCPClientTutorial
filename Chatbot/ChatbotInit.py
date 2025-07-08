@@ -4,18 +4,18 @@ import os
 from typing import List
 from dotenv import load_dotenv
 
-from ToolSchemas.schemas import SEARCH_PAPERS_SCHEMA, EXTRACT_INFO_SCHEMA
+import ToolSchemas.schemas
 import anthropic
 
 PAPER_DIR = "papers"
 
 
-def search_papers(topic: str, maxresults: int = 5) -> List[str]:
+def search_papers(topic: str, max_results: int = 5) -> List[str]:
     client = arxiv.Client()
 
     search = arxiv.Search(
         query=topic,
-        max_results=maxresults,
+        max_results=max_results,
         sort_by=arxiv.SortCriterion.Relevance
     )
 
@@ -35,14 +35,14 @@ def search_papers(topic: str, maxresults: int = 5) -> List[str]:
     paper_ids = []
     for paper in papers:
         paper_ids.append(paper.get_short_id())
-        papers_info = {
+        papers_data = {
             'title': paper.title,
             'authors': [author.name for author in paper.authors],
             'summary': paper.summary,
             'pdf_url': paper.pdf_url,
             'published': str(paper.published.date())
         }
-        papers_info[paper.get_short_id()] = papers_info
+        papers_info[paper.get_short_id()] = papers_data
 
     with open(file_path, "w") as json_file:
         json.dump(papers_info, json_file, indent=2)
@@ -68,43 +68,6 @@ def extract_info(paper_id: str) -> str:
                     continue
     return f"There's no saved information related to paper {paper_id}."
 
-
-# TODO Find a way to clean up this tool schema block
-tools = [
-    {
-        "name": "search_papers",
-        "description": "Search for papers on arXiv based on a topic and store their information.",
-        "input_schema": {
-            "type": "object",
-            "properties": {
-                "topic": {
-                    "type": "string",
-                    "description": "The topic to search for"
-                },
-                "max_results": {
-                    "type": "integer",
-                    "description": "Maximum number of results to retrieve",
-                    "default": 5
-                }
-            },
-            "required": ["topic"]
-        }
-    },
-    {
-        "name": "extract_info",
-        "description": "Search for information about a specific paper across all topic directories.",
-        "input_schema": {
-            "type": "object",
-            "properties": {
-                "paper_id": {
-                    "type": "string",
-                    "description": "The ID of the paper to look for"
-                }
-            },
-            "required": ["paper_id"]
-        }
-    }
-]
 
 mapping_tool_function = {
     "search_papers": search_papers,
@@ -135,7 +98,7 @@ def process_query(query):
 
     response = client.messages.create(max_tokens=2024,
                                       model='claude-3-7-sonnet-20250219',
-                                      tools=tools,
+                                      tools=ToolSchemas.schemas.tools,
                                       messages=messages)
 
     process_query = True
@@ -196,8 +159,13 @@ def chat_loop():
 
 
 def main():
-    papers_id = search_papers("computers", 3)
-    for paper_id in range(len(papers_id)):
-        extract_info(paper_id[paper_id])
+    papers_id = search_papers("computers")
+    for paper_id in papers_id:
+        extract_info(paper_id)
     load_dotenv()
     chat_loop()
+
+
+# Add this at the bottom of your file
+if __name__ == "__main__":
+    main()

@@ -1,40 +1,35 @@
-from mcp.types import Tool
-
-SEARCH_PAPERS_SCHEMA = Tool(
-    name="search_papers",
-    description="Search for academic papers based on a query",
-    inputSchema={
-        "type": "object",
-        "properties": {
-            "query": {
-                "type": "string",
-                "description": "Search query for papers"
+tools = [
+    {
+        "name": "search_papers",
+        "description": "Search for papers on arXiv based on a topic and store their information.",
+        "input_schema": {
+            "type": "object",
+            "properties": {
+                "topic": {
+                    "type": "string",
+                    "description": "The topic to search for"
+                },
+                "max_results": {
+                    "type": "integer",
+                    "description": "Maximum number of results to retrieve",
+                    "default": 5
+                }
             },
-            "max_results": {
-                "type": "integer",
-                "description": "Maximum number of results to return",
-                "default": 10
-            }
-        },
-        "required": ["query"]
-    }
-)
-
-EXTRACT_INFO_SCHEMA = Tool(
-    name="extract_info",
-    description="Extract specific information from a paper",
-    inputSchema={
-        "type": "object",
-        "properties": {
-            "paper_id": {
-                "type": "string",
-                "description": "ID of the paper to extract info from"
+            "required": ["topic"]
+        }
+    },
+    {
+        "name": "extract_info",
+        "description": "Search for information about a specific paper across all topic directories.",
+        "input_schema": {
+            "type": "object",
+            "properties": {
+                "paper_id": {
+                    "type": "string",
+                    "description": "The ID of the paper to look for"
+                }
             },
-            "info_type": {
-                "type": "string",
-                "description": "Type of information to extract"
-            }
-        },
-        "required": ["paper_id", "info_type"]
+            "required": ["paper_id"]
+        }
     }
-)
+]
