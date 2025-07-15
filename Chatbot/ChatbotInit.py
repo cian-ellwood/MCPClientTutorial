@@ -2,14 +2,19 @@ import arxiv
 import json
 import os
 from typing import List
+
 from dotenv import load_dotenv
+from mcp.server.fastmcp import FastMCP
 
 import ToolSchemas.schemas
 import anthropic
 
 PAPER_DIR = "papers"
 
+mcp = FastMCP("research")
 
+
+@mcp.tool()
 def search_papers(topic: str, max_results: int = 5) -> List[str]:
     client = arxiv.Client()
 
@@ -52,6 +57,7 @@ def search_papers(topic: str, max_results: int = 5) -> List[str]:
     return paper_ids
 
 
+@mcp.tool()
 def extract_info(paper_id: str) -> str:
     for item in os.listdir(PAPER_DIR):
         item_path = os.path.join(PAPER_DIR, item)
@@ -168,4 +174,5 @@ def main():
 
 # Add this at the bottom of your file
 if __name__ == "__main__":
+    mcp.run(transport='stdio')
     main()
