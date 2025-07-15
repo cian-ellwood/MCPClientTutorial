@@ -136,7 +136,7 @@ def process_query(query):
                                  })
                 response = client.messages.create(max_tokens=2024,
                                                   model='claude-3-7-sonnet-20250219',
-                                                  tools=tools,
+                                                  tools=ToolSchemas.schemas.tools,
                                                   messages=messages)
 
                 if len(response.content) == 1 and response.content[0].type == "text":
