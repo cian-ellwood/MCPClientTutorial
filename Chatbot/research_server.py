@@ -6,7 +6,8 @@ from mcp.server.fastmcp import FastMCP
 
 PAPER_DIR = "papers"
 
-mcp = FastMCP("research")
+#the port flag allows me to run this remotely
+mcp = FastMCP("research", port=8001)
 
 
 @mcp.tool()
@@ -146,4 +147,5 @@ def generate_search_prompt(topic: str, num_papers: int = 5) -> str:
 
 
 if __name__ == "__main__":
-    mcp.run(transport='stdio')
+    # sse protocol to run remotely, streamable to be added when python supports it. stdio for local
+    mcp.run(transport='sse')
